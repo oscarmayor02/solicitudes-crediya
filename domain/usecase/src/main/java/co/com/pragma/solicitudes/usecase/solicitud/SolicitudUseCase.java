@@ -9,14 +9,10 @@ import co.com.pragma.solicitudes.usecase.exceptions.DomainExceptions;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.java.Log;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.XSlf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.rmi.server.LogStream;
 
-import static java.rmi.server.LogStream.log;
 
 
 /**
@@ -30,7 +26,7 @@ public class SolicitudUseCase {
     private final TipoPrestamoRepository tipoPrestamoRepository;
     public Mono<Solicitud> ejecutar(Solicitud solicitud) {
 
-        log("Iniciando creación de solicitud para usuario: {}" + solicitud.getEmail());
+        log.info("Iniciando creación de solicitud para usuario: {}" + solicitud.getEmail());
 
         // Validaciones básicas
         if (solicitud.getMonto() == null || solicitud.getPlazo() == null || solicitud.getEmail() == null) {

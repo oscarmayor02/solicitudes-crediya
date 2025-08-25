@@ -2,6 +2,7 @@ package co.com.pragma.solicitudes.usecase.estado;
 
 import co.com.pragma.solicitudes.model.estado.Estado;
 import co.com.pragma.solicitudes.model.estado.gateways.EstadoRepository;
+import co.com.pragma.solicitudes.usecase.exceptions.DomainExceptions;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,15 +14,17 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class EstadoUseCase {
 
-    private final EstadoRepository repository; // Puerto hacia infraestructura
+    private final EstadoRepository estadoRepository;
 
-    // Crear nuevo estado
     public Mono<Estado> createEstado(Estado estado) {
-        return repository.save(estado); // Guardar estado en BD
+        if (estado.getNombre() == null || estado.getDescripcion() == null) {
+            return Mono.error(new DomainExceptions.DatosObligatorios("Nombre y descripción son obligatorios"));
+        }
+        return estadoRepository.save(estado);
     }
 
-    // Listar estados disponibles
     public Flux<Estado> listEstados() {
-        return repository.findAll(); // Listar todos los estados
+        return estadoRepository.findAll();
     }
 }
+
