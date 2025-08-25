@@ -47,4 +47,12 @@ public class DomainExceptions extends RuntimeException{
             super("DATOS_OBLIGATORIOS", msg);
         }
     }
+
+    public static class ValidationException extends DomainExceptions {
+        private static final String CODE = "VALIDATION_ERROR";
+
+        public ValidationException(String message) {
+            super(CODE, message);
+        }
+    }
 }
