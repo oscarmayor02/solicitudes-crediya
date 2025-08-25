@@ -2,7 +2,7 @@ server:
   port: 8080
 spring:
   application:
-    name: "solicitudes-crediya"
+    name: "solicitudes-service"
   devtools:
     add-properties: false
   h2:
@@ -11,6 +11,23 @@ spring:
       path: "/h2"
   profiles:
     include: null
+  flyway:
+    enabled: true
+    # Flyway usará su propio DataSource JDBC si se provee esta URL
+    url: "jdbc:mysql://${adapters.r2dbc.host}:${adapters.r2dbc.port}/${adapters.r2dbc.database}"
+    user: "${adapters.r2dbc.username}"
+    password: "${adapters.r2dbc.password}"
+    locations: "classpath:db/migration"
+    connect-retries: 3
+    placeholders:
+      db: "${adapters.r2dbc.database}"
+adapters:
+  r2dbc:
+    host: "localhost"
+    port: 3306
+    database: "solicitudes_db"
+    username: "root"
+    password: ""
 management:
   endpoints:
     web:
@@ -22,3 +39,10 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
