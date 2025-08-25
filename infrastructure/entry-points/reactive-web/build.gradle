@@ -1,15 +1,3 @@
-plugins {
-    id 'org.springframework.boot'
-    id 'java'
-}
-
-group = 'co.com.pragma.solicitudes.reactive-web'
-version = '1.0.0'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-}
-
 dependencies {
     // Módulos internos
     implementation project(':usecase')
