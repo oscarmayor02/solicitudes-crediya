@@ -13,8 +13,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-
-
 /**
  * Caso de uso para crear una nueva Solicitud de préstamo.
  * Contiene las reglas de negocio y validaciones.
@@ -24,6 +22,10 @@ import reactor.core.publisher.Mono;
 public class SolicitudUseCase {
     private final SolicitudRepository solicitudRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
+
+    /**
+     * Crear solicitud
+     */
     public Mono<Solicitud> ejecutar(Solicitud solicitud) {
 
         log.info("Iniciando creación de solicitud para usuario: {}" + solicitud.getEmail());
@@ -38,16 +40,20 @@ public class SolicitudUseCase {
         }
 
         // Validar tipo de préstamo
-        return tipoPrestamoRepository.findById(solicitud.getIdTipoPrestamo())
-                .switchIfEmpty(Mono.error(new DomainExceptions.TipoPrestamoNoExiste("Tipo de préstamo no encontrado")))
+        // Operación dependiente: validar tipo de préstamo existe
+        return tipoPrestamoRepository.findById(solicitud.getIdTipoPrestamo()) // devuelve Mono<TipoPrestamo>
+                .switchIfEmpty(Mono.error(new DomainExceptions.TipoPrestamoNoExiste(
+                        "Tipo de préstamo no encontrado"))) // si no existe, retorna un Mono de error
                 .flatMap(tipoPrestamo -> validarMonto(solicitud, tipoPrestamo))
+                // flatMap -> encadena validaciones asíncronas, retorna Mono<Solicitud>
                 .flatMap(validada -> {
-                    // Asignar estado inicial
                     validada.setIdEstado(EstadoCodigo.PENDIENTE_REVISION.getId());
-                    return solicitudRepository.save(validada);
+                    return solicitudRepository.save(validada); // guarda y devuelve Mono<Solicitud>
                 })
-                .doOnSuccess(s -> SolicitudUseCase.log.info("Solicitud creada con ID: {}"+ s.getIdSolicitud()))
-                .doOnError(e -> SolicitudUseCase.log.warning("Error al crear solicitud: {}"+ e.getMessage()));
+                .doOnSuccess(s -> log.info("Solicitud creada con ID: {}" + s.getIdSolicitud()))
+                // doOnSuccess -> logging cuando se completa con éxito
+                .doOnError(e -> log.warning("Error al crear solicitud: {}" + e.getMessage()));
+        // doOnError -> logging si ocurre error
     }
 
     // Validación de monto
@@ -62,11 +68,13 @@ public class SolicitudUseCase {
     public Flux<Solicitud> getAllSolicitudes() {
         return solicitudRepository.findAll();
     }
+// Flux = colección reactiva de 0..N elementos
 
     public Mono<Solicitud> getSolicitudById(Long id) {
         return solicitudRepository.findById(id)
                 .switchIfEmpty(Mono.error(new DomainExceptions.NotFound("Solicitud no encontrada")));
     }
+// switchIfEmpty -> retorna error si no existe el registro
 
     public Mono<Solicitud> editSolicitud(Solicitud solicitud) {
         return solicitudRepository.findById(solicitud.getIdSolicitud())
@@ -77,7 +85,6 @@ public class SolicitudUseCase {
     public Mono<Void> delete(Long id) {
         return solicitudRepository.delete(id);
     }
-
 
 
 }

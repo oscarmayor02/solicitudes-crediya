@@ -13,50 +13,64 @@ import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Test unitario para EstadoRepositoryAdapter.
+ * Verifica que las operaciones básicas (save, findAll, findById) funcionen correctamente.
+ */
 class EstadoRepositoryAdapterTest {
 
-    private IEstadoReactiveRepository reactiveRepository;
-    private EstadoMapper mapper;
-    private EstadoRepositoryAdapter adapter;
+    private IEstadoReactiveRepository reactiveRepository; // Mock del repositorio reactivo
+    private EstadoMapper mapper;                           // Mock del mapper Dominio ↔ Entidad
+    private EstadoRepositoryAdapter adapter;               // Adapter que vamos a probar
 
     @BeforeEach
     void setup() {
+        // Creamos mocks
         reactiveRepository = Mockito.mock(IEstadoReactiveRepository.class);
         mapper = Mockito.mock(EstadoMapper.class);
+
+        // Inicializamos el adapter con los mocks
         adapter = new EstadoRepositoryAdapter(reactiveRepository, mapper);
     }
 
     @Test
     void saveEstado_Exitoso() {
-        Estado estado = new Estado();
-        when(mapper.toEntity(any())).thenReturn(new EstadoEntity());
-        when(mapper.toModel(any())).thenReturn(estado);
-        when(reactiveRepository.save(any())).thenReturn(Mono.just(new EstadoEntity()));
+        Estado estado = new Estado(); // Dominio que queremos guardar
 
-        StepVerifier.create(adapter.save(estado))
-                .expectNext(estado)
-                .verifyComplete();
+        // Configuramos el comportamiento de los mocks
+        when(mapper.toEntity(any())).thenReturn(new EstadoEntity()); // Mapper: dominio → entidad
+        when(mapper.toModel(any())).thenReturn(estado);             // Mapper: entidad → dominio
+        when(reactiveRepository.save(any())).thenReturn(Mono.just(new EstadoEntity())); // Repositorio reactivo devuelve Mono<Entidad>
+
+        // StepVerifier verifica el comportamiento reactivo
+        StepVerifier.create(adapter.save(estado)) // Invocamos el método save del adapter
+                .expectNext(estado)               // Esperamos recibir el objeto dominio
+                .verifyComplete();               // Verificamos que el flujo se complete correctamente
     }
 
     @Test
     void findAllEstados_Exitoso() {
         Estado estado = new Estado();
-        when(reactiveRepository.findAll()).thenReturn(Flux.just(new EstadoEntity()));
-        when(mapper.toModel(any())).thenReturn(estado);
 
-        StepVerifier.create(adapter.findAll())
-                .expectNext(estado)
-                .verifyComplete();
+        // Configuramos los mocks
+        when(reactiveRepository.findAll()).thenReturn(Flux.just(new EstadoEntity())); // Repositorio devuelve Flux<Entidad>
+        when(mapper.toModel(any())).thenReturn(estado); // Mapper convierte a dominio
+
+        StepVerifier.create(adapter.findAll())   // Probamos el método findAll
+                .expectNext(estado)             // Verificamos que devuelva el objeto dominio
+                .verifyComplete();              // Verificamos que el flujo se complete
     }
 
     @Test
     void findById_Exitoso() {
         Estado estado = new Estado();
+
+        // Mock del repositorio y del mapper
         when(reactiveRepository.findById(1L)).thenReturn(Mono.just(new EstadoEntity()));
         when(mapper.toModel(any())).thenReturn(estado);
 
-        StepVerifier.create(adapter.findById(1L))
-                .expectNext(estado)
+        StepVerifier.create(adapter.findById(1L)) // Probamos findById
+                .expectNext(estado)               // Verificamos que retorne el objeto dominio
                 .verifyComplete();
     }
 }

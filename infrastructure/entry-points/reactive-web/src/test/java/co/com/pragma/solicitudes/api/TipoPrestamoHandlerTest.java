@@ -17,15 +17,17 @@ import static org.mockito.Mockito.*;
 
 class TipoPrestamoHandlerTest {
 
-    private TipoPrestamoUseCase useCase;
-    private TipoPrestamoHandler handler;
-    private WebTestClient client;
+    private TipoPrestamoUseCase useCase; // Mock del caso de uso
+    private TipoPrestamoHandler handler; // Handler a testear
+    private WebTestClient client; // Cliente WebTestClient
 
     @BeforeEach
     void setup() {
-        useCase = Mockito.mock(TipoPrestamoUseCase.class);
-        handler = new TipoPrestamoHandler(useCase);
-        client = WebTestClient.bindToRouterFunction(new RouterRestTipoPrestamo().tipoPrestamoRoutes(handler)).build();
+        useCase = Mockito.mock(TipoPrestamoUseCase.class); // Creamos mock
+        handler = new TipoPrestamoHandler(useCase); // Inyectamos mock en handler
+        client = WebTestClient.bindToRouterFunction(
+                new RouterRestTipoPrestamo().tipoPrestamoRoutes(handler)).build();
+        // Cliente ligado al router de TipoPrestamo
     }
 
     @Test
@@ -34,18 +36,19 @@ class TipoPrestamoHandlerTest {
         tipo.setNombre("Personal");
         tipo.setMontoMinimo(BigDecimal.valueOf(1000));
         tipo.setMontoMaximo(BigDecimal.valueOf(5000));
-        tipo.setTasaInteres(BigDecimal.valueOf(2));
+        tipo.setTasaInteres(BigDecimal.valueOf(2)); // Valores de prueba
 
         when(useCase.crear(any())).thenReturn(Mono.just(tipo));
+        // Mock: al crear, devuelve el tipo prestamo
 
-        client.post()
-                .uri("/api/v1/tipos-prestamo")
+        client.post() // POST
+                .uri("/api/v1/tipos-prestamo") // Endpoint
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(tipo)
+                .bodyValue(tipo) // Body JSON
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TipoPrestamo.class)
-                .isEqualTo(tipo);
+                .isEqualTo(tipo); // Compara respuesta con mock
     }
 
     @Test
@@ -53,12 +56,13 @@ class TipoPrestamoHandlerTest {
         TipoPrestamo t1 = new TipoPrestamo();
         TipoPrestamo t2 = new TipoPrestamo();
         when(useCase.listar()).thenReturn(Flux.just(t1, t2));
+        // Mock: lista de tipos de prestamo
 
         client.get()
                 .uri("/api/v1/tipos-prestamo")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(TipoPrestamo.class)
-                .hasSize(2);
+                .hasSize(2); // Verifica que la lista tenga 2 elementos
     }
 }

@@ -17,6 +17,7 @@ public class DomainExceptions extends RuntimeException{
     }
 
     // Todas las subclases ahora heredan de DomainExceptions
+    // Ejemplos de subclases para distintos errores de negocio
     public static class NotFound extends DomainExceptions {
         public NotFound(String message) {
             super("NOT_FOUND", message);

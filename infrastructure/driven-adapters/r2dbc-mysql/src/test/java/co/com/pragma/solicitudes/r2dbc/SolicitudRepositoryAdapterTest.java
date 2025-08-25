@@ -16,12 +16,16 @@ import java.math.BigDecimal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Test unitario para SolicitudRepositoryAdapter.
+ * Incluye transacciones reactivas (TransactionalOperator).
+ */
 class SolicitudRepositoryAdapterTest {
 
-    private ISolicitudReactiveRepository reactiveRepository;
-    private SolicitudMapper mapper;
-    private TransactionalOperator transactionalOperator;
-    private SolicitudRepositoryAdapter adapter;
+    private ISolicitudReactiveRepository reactiveRepository; // Repo reactivo
+    private SolicitudMapper mapper;                           // Mapper Dominio ↔ Entidad
+    private TransactionalOperator transactionalOperator;     // Control transacciones
+    private SolicitudRepositoryAdapter adapter;               // Adapter bajo prueba
 
     @BeforeEach
     void setup() {
@@ -37,9 +41,11 @@ class SolicitudRepositoryAdapterTest {
         Solicitud solicitud = new Solicitud();
         solicitud.setMonto(BigDecimal.valueOf(1000));
 
+        // Configuración mocks
         when(mapper.toEntity(any())).thenReturn(new SolicitudEntity());
         when(mapper.toModel(any())).thenReturn(solicitud);
         when(reactiveRepository.save(any())).thenReturn(Mono.just(new SolicitudEntity()));
+        // Mock del operador transaccional: devuelve el Mono original
         when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         StepVerifier.create(adapter.save(solicitud))
@@ -71,6 +77,7 @@ class SolicitudRepositoryAdapterTest {
 
     @Test
     void delete_Exitoso() {
+        // Delete devuelve Mono vacío
         when(reactiveRepository.deleteById(1L)).thenReturn(Mono.empty());
         when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

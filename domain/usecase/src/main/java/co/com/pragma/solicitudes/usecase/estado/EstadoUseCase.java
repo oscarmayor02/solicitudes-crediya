@@ -16,15 +16,26 @@ public class EstadoUseCase {
 
     private final EstadoRepository estadoRepository;
 
+    /**
+     * Crea un estado nuevo.
+     * Devuelve un Mono porque es una operación asíncrona y reactiva.
+     * Mono = 0 o 1 elemento.
+     */
     public Mono<Estado> createEstado(Estado estado) {
         if (estado.getNombre() == null || estado.getDescripcion() == null) {
+            // Mono.error genera un flujo que termina en error reactivo si faltan datos obligatorios
             return Mono.error(new DomainExceptions.DatosObligatorios("Nombre y descripción son obligatorios"));
         }
+        // Guarda el estado usando el repositorio reactivo
         return estadoRepository.save(estado);
     }
 
+    /**
+     * Lista todos los estados.
+     * Flux = 0..N elementos (colección reactiva)
+     */
     public Flux<Estado> listEstados() {
-        return estadoRepository.findAll();
+        return estadoRepository.findAll(); // No bloquea, la base de datos puede emitir varios registros
     }
 }
 

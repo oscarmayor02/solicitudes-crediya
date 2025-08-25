@@ -15,8 +15,8 @@ public class RouterRestTipoPrestamo {
 
     @Bean
     public RouterFunction<ServerResponse> tipoPrestamoRoutes(TipoPrestamoHandler handler) {
-        return route(POST("/api/v1/tipos-prestamo"), handler::crear)
-                .andRoute(GET("/api/v1/tipos-prestamo"), handler::listar)
-                .andRoute(GET("/api/v1/tipos-prestamo/{id}"), handler::obtenerPorId);
+        return route(POST(TipoPrestamoHandler.RUTA_TIPO_PRESTAMO), handler::crear)
+                .andRoute(GET(TipoPrestamoHandler.RUTA_TIPO_PRESTAMO), handler::listar)
+                .andRoute(GET(TipoPrestamoHandler.RUTA_TIPO_PRESTAMO + "/{id}"), handler::obtenerPorId);
     }
 }

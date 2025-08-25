@@ -15,6 +15,10 @@ import java.math.BigDecimal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Test unitario para TipoPrestamoUseCase.
+ * Validamos creación de tipos de préstamo, errores y listados.
+ */
 class TipoPrestamoUseCaseTest {
 
     private TipoPrestamoRepository repository;
@@ -67,7 +71,6 @@ class TipoPrestamoUseCaseTest {
         verify(repository, times(1)).existsByNombreIgnoreCase("Personal");
         verify(repository, never()).save(any());
     }
-
 
     @Test
     void listarTiposPrestamo_Success() {

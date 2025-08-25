@@ -8,16 +8,18 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-@Configuration
+@Configuration // Marca la clase como configuración de rutas
 public class RouterRest {
 
+    /**
+     * Define las rutas HTTP para solicitudes
+     */
     @Bean
     public RouterFunction<ServerResponse> solicitudRoutes(SolicitudHandler handler) {
-        return route(POST("/api/v1/solicitudes"), handler::crearSolicitud)
-                .andRoute(GET("/api/v1/solicitudes"), handler::listarSolicitudes)
-                .andRoute(GET("/api/v1/solicitudes/{id}"), handler::obtenerPorId)
-                .andRoute(PUT("/api/v1/solicitudes"), handler::editarSolicitud)
-                .andRoute(DELETE("/api/v1/solicitudes/{id}"), handler::eliminarSolicitud);
-
+        return route(POST(SolicitudHandler.RUTA_SOLICITUD), handler::crearSolicitud) // POST -> crear
+                .andRoute(GET(SolicitudHandler.RUTA_SOLICITUD), handler::listarSolicitudes) // GET -> listar
+                .andRoute(GET(SolicitudHandler.RUTA_SOLICITUD + "/{id}"), handler::obtenerPorId) // GET por ID
+                .andRoute(PUT(SolicitudHandler.RUTA_SOLICITUD), handler::editarSolicitud) // PUT -> editar
+                .andRoute(DELETE(SolicitudHandler.RUTA_SOLICITUD + "/{id}"), handler::eliminarSolicitud); // DELETE por ID
     }
 }
