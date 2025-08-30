@@ -1,15 +1,23 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
-	implementation project(':r2dbc-postgresql')
-	implementation project(':reactive-web')
+    implementation project(':reactive-web')
+    implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+    implementation project(':r2dbc-mysql')
     implementation project(':model')
     implementation project(':usecase')
     implementation 'org.springframework.boot:spring-boot-starter'
+    // Flyway for DB migrations (JDBC-based, independent of R2DBC runtime)
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    // Logger (Spring Boot ya lo trae por defecto, pero si es standalone agrega esto)
+    implementation 'org.slf4j:slf4j-api:2.0.13'
+    implementation("ch.qos.logback:logback-classic:1.5.18")
+
 }
 
 tasks.register('explodedJar', Copy) {
