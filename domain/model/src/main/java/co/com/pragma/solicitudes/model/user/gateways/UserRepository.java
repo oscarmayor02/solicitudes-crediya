@@ -1,4 +1,5 @@
 package co.com.pragma.solicitudes.model.user.gateways;
+
 import co.com.pragma.solicitudes.model.user.User;
 import reactor.core.publisher.Mono;
 
@@ -12,18 +13,20 @@ import reactor.core.publisher.Mono;
 public interface UserRepository {
 
     /**
-     * Consulta un usuario por su ID
+     * Consulta un usuario por su ID en el micro de autenticación.
      *
-     * @param id del usuario en el micro de autenticación
-     * @return Mono<UsuarioDTO> si existe, vacío si no existe
+     * @param id del usuario
+     * @param token JWT de autenticación
+     * @return Mono<User> si existe
      */
-    Mono<User> getUserById(Long id);
+    Mono<User> getUserById(Long id, String token);
 
     /**
-     * Verifica si un email existe en el micro de autenticación
+     * Verifica si un email existe en el micro de autenticación.
      *
-     * @param email a consultar
+     * @param email email a consultar
+     * @param token JWT de autenticación
      * @return Mono<Boolean> true si existe, false si no
      */
-    Mono<Boolean> existsByEmail(String email);
+    Mono<Boolean> existsByEmail(String email, String token);
 }

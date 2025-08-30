@@ -21,29 +21,29 @@ public class User {
     private Long idNumber;
 
     /** Nombre del usuario. */
-    private String nombre;
+    private String name;
 
     /** Apellido del usuario. */
-    private String apellido;
+    private String lastName;
 
     /** Fecha de nacimiento en formato String (YYYY-MM-DD). */
-    private String fechaNacimiento;
+    private String dateOfBirth;
 
     /** Dirección de residencia. */
-    private String direccion;
+    private String address;
 
     /** Teléfono de contacto. */
-    private String telefono;
+    private String telephone;
 
     /** Correo electrónico. */
-    private String correoElectronico;
+    private String email;
 
     /** Salario base del usuario. */
-    private BigDecimal salarioBase;
+    private BigDecimal baseSalary;
 
     /** Documento de identidad . */
-    private String documentoIdentidad;
+    private String identityDocument;
 
     /** Rol asociado al usuario (FK a Rol). */
-    private BigDecimal idRol;
+    private BigDecimal idRole;
 }

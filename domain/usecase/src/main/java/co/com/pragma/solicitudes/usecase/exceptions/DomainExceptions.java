@@ -1,13 +1,16 @@
 package co.com.pragma.solicitudes.usecase.exceptions;
 
+import co.com.pragma.solicitudes.model.constants.ApplicationConstants;
+
 /**
- * Excepciones de dominio personalizadas.
- * Permiten diferenciar errores de negocio en el flujo de solicitudes.
+ * Excepciones de dominio personalizadas para la capa de negocio.
+ * Cada excepción tiene un código único y un mensaje asociado.
  */
-public class DomainExceptions extends RuntimeException{
+public abstract class DomainExceptions extends RuntimeException {
+
     private final String code;
 
-    public DomainExceptions(String code, String message) {
+    protected DomainExceptions(String code, String message) {
         super(message);
         this.code = code;
     }
@@ -16,43 +19,59 @@ public class DomainExceptions extends RuntimeException{
         return code;
     }
 
-    // Todas las subclases ahora heredan de DomainExceptions
-    // Ejemplos de subclases para distintos errores de negocio
+    // ===================== EXCEPCIONES ESPECÍFICAS =====================
+
+    /**
+     * Recurso no encontrado.
+     */
     public static class NotFound extends DomainExceptions {
         public NotFound(String message) {
-            super("NOT_FOUND", message);
+            super(ApplicationConstants.NOT_FOUND, message);
         }
     }
 
+    /**
+     * Tipo de préstamo no existe.
+     */
     public static class TipoPrestamoNoExiste extends DomainExceptions {
-        public TipoPrestamoNoExiste(String msg) {
-            super("TIPO_PRESTAMO_NO_EXISTE", msg);
+        public TipoPrestamoNoExiste(String message) {
+            super(ApplicationConstants.TIPO_PRESTAMO_NO_EXISTE, message);
         }
     }
 
+    /**
+     * Monto fuera de rango permitido.
+     */
     public static class MontoFueraDeRango extends DomainExceptions {
-        public MontoFueraDeRango(String msg) {
-            super("MONTO_FUERA_DE_RANGO", msg);
+        public MontoFueraDeRango(String message) {
+            super(ApplicationConstants.MONTO_FUERA_DE_RANGO, message);
         }
     }
 
+    /**
+     * Plazo inválido para el préstamo.
+     */
     public static class PlazoInvalido extends DomainExceptions {
-        public PlazoInvalido(String msg) {
-            super("PLAZO_INVALIDO", msg);
+        public PlazoInvalido(String message) {
+            super(ApplicationConstants.PLAZO_INVALIDO, message);
         }
     }
 
+    /**
+     * Faltan datos obligatorios.
+     */
     public static class DatosObligatorios extends DomainExceptions {
-        public DatosObligatorios(String msg) {
-            super("DATOS_OBLIGATORIOS", msg);
+        public DatosObligatorios(String message) {
+            super(ApplicationConstants.DATOS_OBLIGATORIOS, message);
         }
     }
 
+    /**
+     * Error genérico de validación.
+     */
     public static class ValidationException extends DomainExceptions {
-        private static final String CODE = "VALIDATION_ERROR";
-
         public ValidationException(String message) {
-            super(CODE, message);
+            super(ApplicationConstants.VALIDATION_ERROR, message);
         }
     }
 }

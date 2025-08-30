@@ -34,7 +34,9 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
     implementation 'org.slf4j:slf4j-api:2.0.13'
     implementation 'ch.qos.logback:logback-classic:1.5.13'
-
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
 
 }

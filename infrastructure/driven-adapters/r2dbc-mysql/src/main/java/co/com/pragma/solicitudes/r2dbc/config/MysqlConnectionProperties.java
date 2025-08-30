@@ -1,6 +1,6 @@
 package co.com.pragma.solicitudes.r2dbc.config;
 
-// TODO: Load properties from the application.yaml file or from secrets manager
+// TODO: Load properties from the Application.yaml file or from secrets manager
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "adapters.r2dbc")
