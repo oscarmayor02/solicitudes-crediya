@@ -48,3 +48,6 @@ springdoc:
     path: /swagger-ui.html
 jwt:
   secret: "${JWT_SECRET:ChangeThisSecretKeyToASecureLongRandomValue!@PrAgma2024}"
+clients:
+  autenticacion:
+    base-url: ${AUTENTICACION_BASE_URL:http://autenticacion:8081}

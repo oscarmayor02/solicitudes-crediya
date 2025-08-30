@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: solicitudes-service
+
+  datasource:
+    url: jdbc:mysql://mysql-solicitudes:3306/solicitudes_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+
+  r2dbc:
+    url: r2dbc:mariadb://mysql-solicitudes:3306/solicitudes_db
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    url: jdbc:mysql://mysql-solicitudes:3306/solicitudes_db
+    user: ${DB_USER:root}
+    password: ${DB_PASS:root}
+    locations: classpath:db/migration
+    connect-retries: 3
+    baseline-on-migrate: true
+
+clients:
+  autenticacion:
+    base-url: ${AUTENTICACION_BASE_URL:http://autenticacion:8081}
+
+adapters:
+  r2dbc:
+    host: mysql-solicitudes
+    port: 3306
+    database: solicitudes_db
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secret: ${JWT_SECRET:ChangeThisSecretKeyToASecureLongRandomValue!@PrAgma2024}
