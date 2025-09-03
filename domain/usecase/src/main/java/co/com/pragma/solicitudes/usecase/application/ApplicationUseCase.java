@@ -1,6 +1,8 @@
 package co.com.pragma.solicitudes.usecase.application;
 
 import co.com.pragma.solicitudes.model.application.Application;
+import co.com.pragma.solicitudes.model.applicationdecisionevent.ApplicationDecisionEvent;
+import co.com.pragma.solicitudes.model.applicationdecisionevent.gateways.DecisionPublisher;
 import co.com.pragma.solicitudes.model.constants.ApplicationConstants;
 import co.com.pragma.solicitudes.model.enums.CodeState;
 import co.com.pragma.solicitudes.model.loantype.gateways.LoanTypeRepository;
@@ -12,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.util.List;
 
 @Log
@@ -22,6 +23,7 @@ public class ApplicationUseCase {
     private final ApplicationRepository applicationRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final UserRepository usuarioClient;
+    private final DecisionPublisher decisionPublisher; // nuevo puerto
 
     public Mono<Application> execute(Application application, String token) {
         log.info(ApplicationConstants.LOG_START_CREATION + application.getEmail());
@@ -105,4 +107,60 @@ public class ApplicationUseCase {
     public Flux<Application> getApplicationsByState(Long idEstado) {
         return applicationRepository.findByState(List.of(idEstado));
     }
+
+    /**
+     * Aplica decisión final (APROBADA/RECHAZADA) y publica evento a SQS.
+     */
+    public Mono<Application> decide(Long applicationId,
+                                    CodeState decision,
+                                    String token,
+                                    String correlationId,
+                                    String observations) {
+
+        // Valida que la decisión sea una de las permitidas.
+        if (!(CodeState.APROBADA.equals(decision) || CodeState.RECHAZADA.equals(decision))) {
+            return Mono.error(new DomainExceptions.ValidationException(
+                    ApplicationConstants.MSG_DECISION_ALLOWED));
+        }
+
+        return applicationRepository.findById(applicationId)
+                .switchIfEmpty(Mono.error(new DomainExceptions.NotFound(
+                        ApplicationConstants.MSG_APPLICATION_NOT_FOUND)))
+                // Enriquecemos con user y loanType (útil para notificación)
+                .flatMap(app -> Mono.zip(
+                        Mono.just(app),
+                        usuarioClient.getUserById(app.getIdUser(), token),
+                        loanTypeRepository.findById(app.getLoanTypeID())
+                ))
+                .flatMap(tuple -> {
+                    Application app = tuple.getT1();
+
+                    // Cambiamos el estado en memoria.
+                    app.setIdState(decision.getId());
+
+                    // Persistimos y luego publicamos el evento.
+                    return applicationRepository.save(app)
+                            .flatMap(saved -> {
+                                ApplicationDecisionEvent event = ApplicationDecisionEvent.builder()
+                                        .eventId(java.util.UUID.randomUUID().toString())
+                                        .idApplication(saved.getIdApplication())
+                                        .idUser(saved.getIdUser())
+                                        .email(saved.getEmail())
+                                        .loanTypeId(saved.getLoanTypeID())
+                                        .decision(decision.name())
+                                        .observations(observations)
+                                        .correlationId(correlationId)
+                                        .decidedAt(java.time.Instant.now())
+                                        .build();
+
+                                return decisionPublisher.publish(event).thenReturn(saved);
+                            });
+                })
+                .doOnSuccess(a -> log.info(ApplicationConstants.LOG_DECISION_APPLY +
+                        a.getIdApplication()+ decision.name()+ correlationId))
+                .doOnError(e -> log.warning(ApplicationConstants.LOG_DECISION_ERROR+
+                        applicationId+ correlationId+ e.toString()));
+    }
+
+
 }

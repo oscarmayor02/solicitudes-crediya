@@ -79,7 +79,7 @@ public class RouterRest {
             ),
             // UPDATE
             @RouterOperation(
-                    path =ApplicationConstants.RUTA_SOLICITUD,
+                    path = ApplicationConstants.RUTA_SOLICITUD,
                     produces = {MediaType.APPLICATION_JSON_VALUE},
                     method = RequestMethod.PUT,
                     beanClass = ApplicationHandler.class,
@@ -124,14 +124,35 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "200", description = "Lista de solicitudes en revisión")
                             }
                     )
-            )
-    })
-    public RouterFunction<ServerResponse> solicitudRoutes(ApplicationHandler handler) {
+            ),
+            @RouterOperation(
+                    path = ApplicationConstants.RUTA_SOLICITUD_DECISION,   // "/api/v1/solicitud"
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.PUT,
+                    beanClass = ApplicationHandler.class,
+                    beanMethod = "decide",
+                    operation = @Operation(
+                            operationId = "decideApplication",
+                            summary = "Aprobar o rechazar solicitud (rol ASESOR)",
+                            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                    required = true,
+                                    content = @Content(schema = @Schema(implementation = co.com.pragma.solicitudes.api.dto.DecisionRequest.class))
+                            ),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Decisión aplicada y evento encolado"),
+                                    @ApiResponse(responseCode = "401", description = "No autorizado"),
+                                    @ApiResponse(responseCode = "403", description = "Sin permisos"),
+                                    @ApiResponse(responseCode = "404", description = "No encontrado")
+                            }
+                    )
+            )})
+    public RouterFunction<ServerResponse> applicationRoutes(ApplicationHandler handler) {
         return route(POST(ApplicationConstants.RUTA_SOLICITUD), handler::createApplication)
-                .andRoute(GET(ApplicationConstants.RUTA_SOLICITUD_REVISION), handler::listReviewApplication) // ✅ Aquí la nueva ruta
+                .andRoute(GET(ApplicationConstants.RUTA_SOLICITUD_REVISION), handler::listReviewApplication)
                 .andRoute(GET(ApplicationConstants.RUTA_SOLICITUD), handler::listApplications)
                 .andRoute(GET(ApplicationConstants.RUTA_SOLICITUD + "/{id}"), handler::getById)
                 .andRoute(PUT(ApplicationConstants.RUTA_SOLICITUD), handler::editApplication)
+                .andRoute(PUT(ApplicationConstants.RUTA_SOLICITUD_DECISION), handler::decide)
                 .andRoute(DELETE(ApplicationConstants.RUTA_SOLICITUD + "/{id}"), handler::deleteApplication);
     }
 }
