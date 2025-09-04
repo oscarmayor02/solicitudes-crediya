@@ -64,8 +64,6 @@ aws:
 # 🔽 NUEVO: URLs de las colas que usamos en la opción B (SQS-only)
     capacity-req-url:
     capacity-res-url:
-
-
 logging:
   level:
     root: INFO
