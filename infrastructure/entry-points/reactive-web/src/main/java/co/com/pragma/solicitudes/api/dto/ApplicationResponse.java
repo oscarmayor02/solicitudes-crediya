@@ -21,5 +21,5 @@ public class ApplicationResponse {
     private BigDecimal rateInterest;   // tasa de interés
     private String stateApplication;   // nombre del estado
     private BigDecimal baseSalary;   // salario del usuario (micro usuarios)
-    private BigDecimal TotalMonthlyDebtApprovedRequests; // deuda total
+   // private BigDecimal TotalMonthlyDebtApprovedRequests; // deuda total
 }

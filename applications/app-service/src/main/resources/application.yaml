@@ -56,11 +56,16 @@ clients:
 aws:
   region: ap-southeast-2
   credentials:
-    access-key: ""
-    secret-key: ""
+    access-key:
+    secret-key:
   sqs:
-    decision-queue-url: "https://sqs.ap-southeast-2.amazonaws.com/601836273907/solicitudes-decisions.fifo"
+    decision-queue-url:
     fifo: true
+# 🔽 NUEVO: URLs de las colas que usamos en la opción B (SQS-only)
+    capacity-req-url:
+    capacity-res-url:
+
+
 logging:
   level:
     root: INFO

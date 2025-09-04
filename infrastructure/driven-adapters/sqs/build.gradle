@@ -11,6 +11,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     implementation platform("software.amazon.awssdk:bom:2.25.66")
     implementation "software.amazon.awssdk:sqs"
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.1.1'
+
 }
 
 

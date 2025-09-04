@@ -15,16 +15,14 @@ import reactor.core.publisher.Mono;
 public class UserClientRest implements UserRepository {
 
     private static final Logger log = LoggerFactory.getLogger(UserClientRest.class);
-
-    private final WebClient webClient;
+    private final WebClient webClient; // definido en WebClientsConfig
 
     @Override
     public Mono<User> getUserById(Long id, String token) {
         log.info(ApplicationConstants.LOG_GET_USER, id);
-
         return webClient.get()
                 .uri(ApplicationConstants.URI_GET_USER_BY_ID, id)
-                .header("Authorization", ApplicationConstants.AUTH_HEADER_PREFIX + token)
+                .headers(h -> h.setBearerAuth(token))   // 👈 evita problemas de prefijo y espacios
                 .retrieve()
                 .bodyToMono(User.class)
                 .doOnSuccess(u -> log.info(ApplicationConstants.LOG_USER_FOUND_OK, u))
@@ -34,10 +32,9 @@ public class UserClientRest implements UserRepository {
     @Override
     public Mono<Boolean> existsByEmail(String email, String token) {
         log.info(ApplicationConstants.LOG_VERIFICATE_EMAIL, email);
-
         return webClient.get()
                 .uri(ApplicationConstants.URI_EXISTS_EMAIL, email)
-                .header("Authorization", ApplicationConstants.AUTH_HEADER_PREFIX + token)
+                .headers(h -> h.setBearerAuth(token))   // 👈
                 .retrieve()
                 .bodyToMono(EmailExistsResponse.class)
                 .map(EmailExistsResponse::exists)

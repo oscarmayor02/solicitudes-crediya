@@ -3,6 +3,7 @@ package co.com.pragma.solicitudes.usecase.application;
 import co.com.pragma.solicitudes.model.application.Application;
 import co.com.pragma.solicitudes.model.application.gateways.ApplicationRepository;
 import co.com.pragma.solicitudes.model.applicationdecisionevent.gateways.DecisionPublisher;
+import co.com.pragma.solicitudes.model.capacity.gateways.ValidationPublisher;
 import co.com.pragma.solicitudes.model.enums.CodeState;
 import co.com.pragma.solicitudes.model.loantype.LoanType;
 import co.com.pragma.solicitudes.model.loantype.gateways.LoanTypeRepository;
@@ -27,6 +28,7 @@ class ApplicationUseCaseTest {
     private UserRepository usuarioClient;
     private DecisionPublisher decisionPublisher;
     private ApplicationUseCase useCase;
+    private  ValidationPublisher validationPublisher; // puerto para publicar validación
 
     @BeforeEach
     public void setUp() {
@@ -34,9 +36,10 @@ class ApplicationUseCaseTest {
         loanTypeRepository    = Mockito.mock(LoanTypeRepository.class);
         usuarioClient         = Mockito.mock(UserRepository.class);
         decisionPublisher     = Mockito.mock(DecisionPublisher.class);
+        validationPublisher     = Mockito.mock(ValidationPublisher.class);
 
         useCase = new ApplicationUseCase(
-                applicationRepository, loanTypeRepository, usuarioClient, decisionPublisher);
+                applicationRepository, loanTypeRepository, usuarioClient, decisionPublisher, validationPublisher);
 
         // Publicación a SQS siempre OK
         when(decisionPublisher.publish(any())).thenReturn(Mono.empty());
