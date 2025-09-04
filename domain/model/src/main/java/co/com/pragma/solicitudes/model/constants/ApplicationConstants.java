@@ -124,6 +124,33 @@ public final class ApplicationConstants {
     public static final String MSG_NO_TOKEN = "No se proporcionó token de autenticación";
     public static final String MSG_TOKEN_INVALIDO = "Token inválido";
     public static final String MSG_SIN_PERMISOS = "No tienes permiso para acceder a este recurso";
+// ===================== NUEVAS CONSTANTES =====================
+
+    // ===== Ruta singular para decisiones =====
+    public static final String RUTA_SOLICITUD_DECISION = "/api/v1/solicitud"; // Nuevo endpoint PUT para aprobar/rechazar
+
+    // ===== Mensajes para flujo de decisión =====
+    public static final String MSG_DECISION_ALLOWED = "Solo se permiten decisiones APROBADA o RECHAZADA";
+    public static final String MSG_DECISION_FORBIDDEN = "No tiene permisos para tomar decisiones";
+    public static final String MSG_DECISION_PROCESS_ERROR = "Ocurrió un error procesando la decisión";
+
+    // ===== Logs específicos de flujo de decisión =====
+    public static final String LOG_DECISION_RECEIVED = "[HANDLER] Petición de decisión recibida";
+    public static final String LOG_DECISION_APPLY = "[USECASE] Decisión aplicada idApp={} nuevoEstado={} corr={}";
+    public static final String LOG_DECISION_ERROR = "[USECASE] Error al aplicar decisión idApp={} corr={} err={}";
+
+    // ===== Logs para integración con SQS =====
+    public static final String LOG_SQS_PUBLISHING = "[SQS] Publicando decisión idApp={} decision={} corr={}";
+    public static final String LOG_SQS_PUBLISHED = "[SQS] Decisión publicada idApp={} messageId={}";
+    public static final String LOG_SQS_PUBLISH_ERROR = "[SQS] Error publicando decisión idApp={} corr={} err={}";
+
+    // ===== Headers HTTP para trazabilidad =====
+    public static final String HDR_AUTHORIZATION = "Authorization";       // Header estándar para token Bearer
+    public static final String HDR_CORRELATION_ID = "X-Correlation-Id";   // Header para trazabilidad en logs
+
+    // ===== Log para token ausente =====
+    public static final String LOG_MISSING_BEARER = "No se recibió token o formato inválido";
+
 
 
 

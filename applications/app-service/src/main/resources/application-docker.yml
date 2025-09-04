@@ -49,3 +49,11 @@ management:
 
 jwt:
   secret: ${JWT_SECRET:ChangeThisSecretKeyToASecureLongRandomValue!@PrAgma2024}
+aws:
+  region: ${AWS_REGION:ap-southeast-2}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID:changeme}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:changeme}
+  sqs:
+    decision-queue-url: ${AWS_SQS_DECISION_QUEUE_URL:https://sqs.ap-southeast-2.amazonaws.com/601836273907/solicitudes-decisions.fifo}
+    fifo: ${AWS_SQS_FIFO:true}

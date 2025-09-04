@@ -5,6 +5,8 @@ spring:
     name: "solicitudes-service"
   devtools:
     add-properties: false
+  main:
+    allow-bean-definition-overriding: true
   h2:
     console:
       enabled: true
@@ -50,4 +52,22 @@ jwt:
   secret: "${JWT_SECRET:ChangeThisSecretKeyToASecureLongRandomValue!@PrAgma2024}"
 clients:
   autenticacion:
-    base-url: ${AUTENTICACION_BASE_URL:http://autenticacion:8081}
+    base-url: ${AUTENTICACION_BASE_URL:http://localhost:8081}
+aws:
+  region: ap-southeast-2
+  credentials:
+    access-key:
+    secret-key:
+  sqs:
+    decision-queue-url:
+    fifo: true
+# 🔽 NUEVO: URLs de las colas que usamos en la opción B (SQS-only)
+    capacity-req-url:
+    capacity-res-url:
+
+
+logging:
+  level:
+    root: INFO
+    co.com.pragma.solicitudes: DEBUG
+# logging.pattern.level: "%5p [corr:%X{X-Correlation-Id}]"   # opcional para mostrar correlation-id en logs

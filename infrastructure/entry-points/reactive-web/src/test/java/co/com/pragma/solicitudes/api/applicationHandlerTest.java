@@ -23,8 +23,8 @@ class applicationHandlerTest {
     @BeforeEach
     void setup() {
         useCase = Mockito.mock(ApplicationUseCase.class); // Creamos mock
-        handler = new ApplicationHandler(useCase); // Inyectamos mock al handler
-        client = WebTestClient.bindToRouterFunction(new RouterRest().solicitudRoutes(handler)).build();
+        //handler = new ApplicationHandler(useCase); // Inyectamos mock al handler
+        client = WebTestClient.bindToRouterFunction(new RouterRest().applicationRoutes(handler)).build();
         // Cliente de pruebas ligado al router de Solicitudes
     }
 
