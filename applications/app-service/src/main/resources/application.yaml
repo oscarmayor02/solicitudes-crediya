@@ -61,10 +61,11 @@ aws:
   sqs:
     decision-queue-url:
     fifo: true
-# 🔽 NUEVO: URLs de las colas que usamos en la opción B (SQS-only)
+    #  NUEVO: URLs de las colas que usamos en la opción B (SQS-only)
     capacity-req-url:
     capacity-res-url:
-
+      # NUEVO: cola de reportes (Standard)
+    reports-queue-url:
 
 logging:
   level:

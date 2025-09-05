@@ -11,6 +11,7 @@ import co.com.pragma.solicitudes.model.enums.CodeState;
 import co.com.pragma.solicitudes.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.solicitudes.model.application.gateways.ApplicationRepository;
 import co.com.pragma.solicitudes.model.loantype.LoanType;
+import co.com.pragma.solicitudes.model.reportevent.gateways.ReportsPublisher;
 import co.com.pragma.solicitudes.model.user.User;
 import co.com.pragma.solicitudes.model.user.gateways.UserRepository;
 import co.com.pragma.solicitudes.usecase.exceptions.DomainExceptions;
@@ -33,6 +34,7 @@ public class ApplicationUseCase {
     private final UserRepository usuarioClient;
     private final DecisionPublisher decisionPublisher;
     private final ValidationPublisher validationPublisher;
+    private final ReportsPublisher reportsPublisher;
 
     /**
      * Crea una solicitud. Si el préstamo tiene validación automática,
@@ -200,7 +202,20 @@ public class ApplicationUseCase {
                                         .decidedAt(java.time.Instant.now())
                                         .build();
 
-                                return decisionPublisher.publish(event).thenReturn(saved);
+                                // Publicar SIEMPRE a la cola de decisiones que ya manejas:
+                                Mono<Void> notifyMono = decisionPublisher.publish(event);
+// Publicar a REPORTES SOLO si quedó APROBADA:
+                                Mono<Void> reportMono = CodeState.APROBADA.equals(decision)
+                                        ? reportsPublisher.publishApproved(
+                                        String.valueOf(saved.getIdApplication()),
+                                        saved.getEmail(),
+                                        saved.getAmount(),
+                                        saved.getTerm()
+                                )
+                                        : Mono.empty();
+
+                                return notifyMono.then(reportMono).thenReturn(saved);
+
                             });
                 })
                 .doOnSuccess(a -> log.info(ApplicationConstants.LOG_DECISION_APPLY +
@@ -232,6 +247,17 @@ public class ApplicationUseCase {
                     }
                     app.setIdState(state.getId());
                     return applicationRepository.save(app);
+                })
+                .flatMap(saved -> {
+                    if (CodeState.APROBADA.equals(state)) {
+                        return reportsPublisher.publishApproved(
+                                String.valueOf(saved.getIdApplication()),
+                                saved.getEmail(),
+                                saved.getAmount(),
+                                saved.getTerm()
+                        ).thenReturn(saved);
+                    }
+                    return Mono.just(saved);
                 });
     }
 }

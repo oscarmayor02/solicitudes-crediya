@@ -49,11 +49,17 @@ public class DecisionSqsPublisher implements DecisionPublisher {
     @Value("${aws.credentials.secret-key}")
     private String secretKey;
 
+    // --- NUEVO: Cola de REPORTES ---
+    @Value("${aws.sqs.reports-queue-url}")   private String reportsQueueUrl;
+    @Value("${aws.sqs.reports-fifo:false}")  private boolean reportsFifo;
+
     /**
      * Crea una instancia del cliente asíncrono de Amazon SQS.
      * Usa la región y credenciales configuradas en el application.yml.
      * Podríamos extraerlo a un @Bean para reutilizarlo y optimizar recursos.
      */
+    /** Crea cliente SQS con región/credenciales de application.yml */
+
     private SqsAsyncClient client() {
         return SqsAsyncClient.builder()
                 .region(Region.of(awsRegion)) // Especificamos la región de AWS.
@@ -73,6 +79,9 @@ public class DecisionSqsPublisher implements DecisionPublisher {
      * @param event Evento que contiene los datos de la decisión.
      * @return Mono<Void> que completa al terminar la publicación.
      */
+    // =========================
+    // (1) Publicación de DECISIÓN (lo que ya expones por el puerto DecisionPublisher)
+    // =========================
     @Override
     public Mono<Void> publish(ApplicationDecisionEvent event) {
         // Logueamos la configuración actual de SQS para depuración.
@@ -127,4 +136,53 @@ public class DecisionSqsPublisher implements DecisionPublisher {
                     return Mono.error(ex);
                 });
     }
+
+    // =========================
+    // (2) NUEVO: Publicación para REPORTES cuando queda APROBADA
+    // =========================
+    /**
+     * Publica el evento mínimo que el micro REPORTES espera para contar una aprobación.
+     * Este mensaje va a la COLA DE REPORTES, separada de la de decisiones/notificaciones.
+     */
+    public Mono<Void> publishApprovedForReports(String loanId, String email, Double amount, Integer term) {
+        log.info("SQS reports config: region={} url={} fifo={}", awsRegion, reportsQueueUrl, reportsFifo);
+
+        boolean urlIsFifo = reportsQueueUrl != null && reportsQueueUrl.endsWith(".fifo");
+        if (urlIsFifo != reportsFifo) {
+            String msg = "Inconsistencia SQS FIFO (reports): url=" + reportsQueueUrl + " fifo=" + reportsFifo;
+            log.error(msg);
+            return Mono.error(new IllegalStateException(msg));
+        }
+
+        // Construimos el payload EXACTO que consume el micro REPORTES:
+        ApprovedEvent payload = new ApprovedEvent(loanId, email, amount, term);
+
+        return Mono.fromCallable(() -> objectMapper.writeValueAsString(payload))
+                .flatMap(body -> {
+                    SendMessageRequest.Builder builder = SendMessageRequest.builder()
+                            .queueUrl(reportsQueueUrl)
+                            .messageBody(body);
+
+                    if (reportsFifo) {
+                        // Para REPORTES, la idempotencia la maneja Dynamo, pero si es FIFO mejor usar loanId
+                        builder.messageGroupId("reports-" + loanId)
+                                .messageDeduplicationId(loanId);
+                    }
+
+                    log.info("Publicando evento REPORTES: loanId={} email={} monto={} plazoMeses={}",
+                            loanId, email, amount, term);
+
+                    return Mono.fromFuture(client().sendMessage(builder.build()))
+                            .doOnNext(resp -> log.info("Evento REPORTES publicado: loanId={} messageId={}",
+                                    loanId, resp.messageId()))
+                            .then();
+                })
+                .onErrorResume(ex -> {
+                    log.error("Error publicando evento REPORTES (loanId={}): {}", loanId, ex.toString());
+                    return Mono.error(ex);
+                });
+    }
+
+    /** Record local con el contrato que espera REPORTES */
+    record ApprovedEvent(String loanId, String email, Double amount, Integer term) {}
 }
